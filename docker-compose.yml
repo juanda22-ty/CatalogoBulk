@@ -1,0 +1,27 @@
+services:
+  # Tu aplicación Node.js
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file: .env
+    depends_on:
+      - mongo
+      - redis
+
+  # Base de datos MongoDB
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017" # Exponemos el puerto para que puedas ver la BD desde tu PC
+    volumes:
+      - mongo_data:/data/db
+
+  # Base de datos Redis (para caché y colas)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  mongo_data: # Esto evita que los datos se borren si apagas el contenedor
