@@ -1,0 +1,6 @@
+/* Estilos globales propios de la aplicación.
+   Quasar ya incluye el reset de CSS y la tipografía. */
+
+body {
+  background-color: #ffffff;
+}
