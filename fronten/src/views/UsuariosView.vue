@@ -148,7 +148,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import api from '../services/api';
 import { useAppStore } from '../store';
 import { useFeedback } from '../composables/useFeedback';
@@ -302,4 +302,8 @@ async function eliminar(usuario) {
     );
   }
 }
+
+onMounted(() => {
+  cargarUsuarios({ pagination: pagination.value });
+});
 </script>

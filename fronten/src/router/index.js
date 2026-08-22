@@ -11,12 +11,17 @@ import { useAppStore } from '../store';
 
 const routes = [
   {
+    path: '/',
+    name: 'catalogo',
+    component: CatalogoView
+  },
+  {
     path: '/login',
     name: 'login',
     component: LoginView
   },
   {
-    path: '/',
+    path: '/admin',
     component: MainLayout,
     meta: { requiresAuth: true },
     children: [
@@ -39,11 +44,6 @@ const routes = [
         path: 'productos',
         name: 'productos',
         component: ProductosView
-      },
-      {
-        path: 'catalogo',
-        name: 'catalogo',
-        component: CatalogoView
       },
       {
         path: 'usuarios',

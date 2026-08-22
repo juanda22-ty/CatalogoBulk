@@ -17,7 +17,7 @@
       :columns="columns"
       row-key="_id"
       :loading="loading"
-      :pagination="pagination"
+      v-model:pagination="pagination"
       :rows-per-page-options="[5, 10, 20, 50]"
       @request="cargarProductos"
     >
@@ -269,12 +269,9 @@ async function cargarProductos(props) {
   try {
     const res = await api.productos.list({ page, limit: rowsPerPage });
     productos.value = res.data;
-    pagination.value = {
-      ...pagination.value,
-      page: res.page,
-      rowsPerPage: res.limit,
-      rowsNumber: res.total
-    };
+    pagination.value.page = res.page;
+    pagination.value.rowsPerPage = res.limit;
+    pagination.value.rowsNumber = res.total;
   } catch (err) {
     notificar(
       err.response?.data?.error || 'No se pudieron cargar los productos',
@@ -399,5 +396,6 @@ async function eliminar(producto) {
 
 onMounted(() => {
   cargarOpciones();
+  cargarProductos({ pagination: pagination.value });
 });
 </script>

@@ -138,7 +138,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import api from '../services/api';
 import { useFeedback } from '../composables/useFeedback';
 import { useDate } from '../composables/useDate';
@@ -277,4 +277,8 @@ async function eliminar(proveedor) {
     );
   }
 }
+
+onMounted(() => {
+  cargarProveedores({ pagination: pagination.value });
+});
 </script>

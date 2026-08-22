@@ -59,13 +59,6 @@
           <q-item-section>Productos</q-item-section>
         </q-item>
 
-        <q-item :to="{ name: 'catalogo' }" active-class="text-primary text-bold" clickable>
-          <q-item-section avatar>
-            <q-icon name="storefront" color="primary" />
-          </q-item-section>
-          <q-item-section>Catálogo</q-item-section>
-        </q-item>
-
         <q-item
           v-if="auth.isAdmin"
           :to="{ name: 'usuarios' }"

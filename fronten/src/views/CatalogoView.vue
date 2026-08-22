@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-pa-md">
+  <div class="catalogo q-pa-md">
     <div class="text-h5 text-primary text-bold q-mb-md">Catálogo</div>
 
     <q-input
@@ -127,7 +127,7 @@
         </div>
       </div>
     </div>
-  </q-page>
+  </div>
 </template>
 
 <script setup>
@@ -232,6 +232,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.catalogo {
+  min-height: 100vh;
+}
+
 .productos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));

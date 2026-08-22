@@ -21,12 +21,17 @@ http.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Limpia el token si el backend responde 401 (token inválido/expirado).
+// Limpia la sesión si el backend responde 401 (token inválido/expirado)
+// y redirige al login para que el guard de rutas vuelva a evaluar el acceso.
 http.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
+      localStorage.removeItem('usuario');
+      if (window.location.pathname !== '/login') {
+        window.location.assign('/login');
+      }
     }
     return Promise.reject(error);
   }
