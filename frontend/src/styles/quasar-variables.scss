@@ -1,0 +1,16 @@
+// =============================================
+// Tema del proyecto: solo dos colores (verde y blanco)
+// =============================================
+
+$primary   : #159447; // Verde principal
+$secondary : #ffffff; // Blanco
+$accent    : #0d6b35; // Verde oscuro
+
+$dark      : #123c2a;
+$dark-page : #f4faf6;
+
+// Colores semánticos para notificaciones (feedback)
+$positive  : #159447; // Éxito -> verde
+$negative  : #dc2626; // Error -> rojo (única excepción para feedback)
+$info      : #16a34a;
+$warning   : #b45309;
