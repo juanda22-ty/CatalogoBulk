@@ -36,15 +36,6 @@ class ProveedorController {
       next(error);
     }
   }
-
-  async eliminar(req, res, next) {
-    try {
-      await proveedorService.eliminarProveedor(req.params.id);
-      res.status(204).send();
-    } catch (error) {
-      next(error);
-    }
-  }
 }
 
 export default new ProveedorController();

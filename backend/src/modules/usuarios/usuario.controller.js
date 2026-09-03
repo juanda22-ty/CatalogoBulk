@@ -36,15 +36,6 @@ class UsuarioController {
       next(error);
     }
   }
-
-  async eliminar(req, res, next) {
-    try {
-      await usuarioService.eliminar(req.params.id, req.usuario.id);
-      res.status(204).send();
-    } catch (error) {
-      next(error);
-    }
-  }
 }
 
 export default new UsuarioController();

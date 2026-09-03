@@ -3,7 +3,7 @@ import { fileURLToPath, URL } from 'node:url';
 import vue from '@vitejs/plugin-vue';
 import { quasar, transformAssetUrls } from '@quasar/vite-plugin';
 
-// El backend (CatalogoBulk) corre en http://localhost:3000 (ver CatalogoBulk/.env: PORT=3000)
+// El backend (CatalogoBulk) se publica en http://localhost:3001.
 export default defineConfig({
   plugins: [
     vue({ template: { transformAssetUrls } }),
@@ -26,7 +26,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:3001',
         changeOrigin: true
       }
     }

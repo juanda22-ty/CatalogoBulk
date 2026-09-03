@@ -74,11 +74,11 @@
                 flat
                 round
                 dense
-                color="negative"
-                icon="delete"
-                @click="eliminar(props.row)"
+                :color="props.row.activo ? 'warning' : 'positive'"
+                :icon="props.row.activo ? 'pause' : 'play_arrow'"
+                @click="alternarActivo(props.row)"
               >
-                <q-tooltip>Eliminar</q-tooltip>
+                <q-tooltip>{{ props.row.activo ? 'Desactivar' : 'Activar' }}</q-tooltip>
               </q-btn>
             </q-td>
           </template>
@@ -171,7 +171,7 @@ import { useDate } from '../composables/useDate';
 import { required, validEmail } from '../utils/validators';
 
 const auth = useAppStore();
-const { confirmar, notificar } = useFeedback();
+const { notificar } = useFeedback();
 const { formatDate } = useDate();
 
 const tablaRef = ref(null);
@@ -298,23 +298,19 @@ async function guardar() {
   }
 }
 
-async function eliminar(usuario) {
-  const confirmado = await confirmar({
-    title: 'Eliminar usuario',
-    message: `¿Seguro que quieres eliminar el usuario "${usuario.email}"?`,
-    okLabel: 'Eliminar',
-    okColor: 'negative'
-  });
-
-  if (!confirmado) return;
-
+async function alternarActivo(usuario) {
   try {
-    await api.usuarios.remove(usuario._id);
-    notificar('Usuario eliminado correctamente', 'positive');
+    await api.usuarios.update(usuario._id, { activo: !usuario.activo });
+    notificar(
+      usuario.activo
+        ? 'Usuario desactivado correctamente'
+        : 'Usuario activado correctamente',
+      'positive'
+    );
     recargar();
   } catch (err) {
     notificar(
-      err.response?.data?.error || 'No se pudo eliminar el usuario',
+      err.response?.data?.error || 'No se pudo cambiar el estado del usuario',
       'negative'
     );
   }

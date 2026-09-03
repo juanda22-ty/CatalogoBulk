@@ -82,9 +82,8 @@
             <div class="text-subtitle1 text-primary text-bold q-mb-sm">Proveedor</div>
             <q-select
               v-model="filtros.proveedor"
-              :options="proveedores"
-              option-value="_id"
-              option-label="nombre"
+              :options="opcionesProveedores"
+              map-options
               emit-value
               clearable
               outlined
@@ -180,7 +179,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, onMounted } from 'vue';
+import { ref, reactive, computed, watch, onMounted } from 'vue';
 import api from '../services/api';
 import { useFeedback } from '../composables/useFeedback';
 import { formatCurrency } from '../utils/format';
@@ -203,6 +202,14 @@ const filtros = reactive({
 });
 
 const hayMas = () => productos.value.length < total.value;
+
+const proveedoresActivos = computed(() =>
+  proveedores.value.filter((p) => p.activo)
+);
+
+const opcionesProveedores = computed(() =>
+  proveedoresActivos.value.map((p) => ({ label: p.nombre, value: p._id }))
+);
 
 async function cargarOpciones() {
   try {

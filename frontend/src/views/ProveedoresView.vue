@@ -61,11 +61,11 @@
                 flat
                 round
                 dense
-                color="negative"
-                icon="delete"
-                @click="eliminar(props.row)"
+                :color="props.row.activo ? 'warning' : 'positive'"
+                :icon="props.row.activo ? 'pause' : 'play_arrow'"
+                @click="alternarActivo(props.row)"
               >
-                <q-tooltip>Eliminar</q-tooltip>
+                <q-tooltip>{{ props.row.activo ? 'Desactivar' : 'Activar' }}</q-tooltip>
               </q-btn>
             </q-td>
           </template>
@@ -157,7 +157,7 @@ import { useFeedback } from '../composables/useFeedback';
 import { useDate } from '../composables/useDate';
 import { required, validEmail } from '../utils/validators';
 
-const { confirmar, notificar } = useFeedback();
+const { notificar } = useFeedback();
 const { formatDate } = useDate();
 
 const tablaRef = ref(null);
@@ -271,23 +271,19 @@ async function guardar() {
   }
 }
 
-async function eliminar(proveedor) {
-  const confirmado = await confirmar({
-    title: 'Eliminar proveedor',
-    message: `¿Seguro que quieres eliminar el proveedor "${proveedor.nombre}"?`,
-    okLabel: 'Eliminar',
-    okColor: 'negative'
-  });
-
-  if (!confirmado) return;
-
+async function alternarActivo(proveedor) {
   try {
-    await api.proveedores.remove(proveedor._id);
-    notificar('Proveedor eliminado correctamente', 'positive');
+    await api.proveedores.update(proveedor._id, { activo: !proveedor.activo });
+    notificar(
+      proveedor.activo
+        ? 'Proveedor desactivado correctamente'
+        : 'Proveedor activado correctamente',
+      'positive'
+    );
     recargar();
   } catch (err) {
     notificar(
-      err.response?.data?.error || 'No se pudo eliminar el proveedor',
+      err.response?.data?.error || 'No se pudo cambiar el estado del proveedor',
       'negative'
     );
   }

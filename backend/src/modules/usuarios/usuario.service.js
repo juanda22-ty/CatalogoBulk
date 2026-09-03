@@ -90,19 +90,6 @@ class UsuarioService {
     delete usuarioSinPassword.password;
     return usuarioSinPassword;
   }
-
-  async eliminar(id, usuarioActualId) {
-    if (String(id) === String(usuarioActualId)) {
-      throw new AppError('No puedes eliminar tu propia cuenta', 403, 'FORBIDDEN');
-    }
-
-    const usuario = await usuarioRepository.obtenerPorId(id);
-    if (!usuario) {
-      throw new AppError('Usuario no encontrado', 404, 'NOT_FOUND');
-    }
-
-    await usuarioRepository.eliminar(id);
-  }
 }
 
 export default new UsuarioService();

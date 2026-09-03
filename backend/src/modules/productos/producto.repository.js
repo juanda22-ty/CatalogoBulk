@@ -22,10 +22,6 @@ class ProductoRepository {
     return await Producto.findByIdAndUpdate(id, datos, { new: true, runValidators: true });
   }
 
-  async eliminar(id) {
-    return await Producto.findByIdAndDelete(id);
-  }
-
   async obtenerStats() {
     const [statsGenerales, porCategoria] = await Promise.all([
       Producto.aggregate([

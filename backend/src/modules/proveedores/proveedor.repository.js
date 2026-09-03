@@ -1,5 +1,4 @@
 import Proveedor from './proveedor.model.js';
-import Producto from '../productos/producto.model.js';
 
 class ProveedorRepository {
   async crear(datos) {
@@ -21,14 +20,6 @@ class ProveedorRepository {
 
   async actualizar(id, datos) {
     return await Proveedor.findByIdAndUpdate(id, datos, { new: true, runValidators: true });
-  }
-
-  async eliminar(id) {
-    return await Proveedor.findByIdAndDelete(id);
-  }
-
-  async contarProductosAsociados(proveedorId) {
-    return await Producto.countDocuments({ proveedorId });
   }
 }
 

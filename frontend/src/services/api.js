@@ -47,8 +47,7 @@ const api = {
     get: (id) => http.get(`/proveedores/${id}`).then((res) => res.data),
     create: (datos) => http.post('/proveedores', datos).then((res) => res.data),
     update: (id, datos) =>
-      http.put(`/proveedores/${id}`, datos).then((res) => res.data),
-    remove: (id) => http.delete(`/proveedores/${id}`)
+      http.put(`/proveedores/${id}`, datos).then((res) => res.data)
   },
 
   categorias: {
@@ -67,7 +66,6 @@ const api = {
     create: (datos) => http.post('/productos', datos).then((res) => res.data),
     update: (id, datos) =>
       http.put(`/productos/${id}`, datos).then((res) => res.data),
-    remove: (id) => http.delete(`/productos/${id}`),
     stats: () => http.get('/productos/stats').then((res) => res.data)
   },
 
@@ -77,8 +75,7 @@ const api = {
     get: (id) => http.get(`/usuarios/${id}`).then((res) => res.data),
     create: (datos) => http.post('/usuarios', datos).then((res) => res.data),
     update: (id, datos) =>
-      http.put(`/usuarios/${id}`, datos).then((res) => res.data),
-    remove: (id) => http.delete(`/usuarios/${id}`)
+      http.put(`/usuarios/${id}`, datos).then((res) => res.data)
   }
 };
 

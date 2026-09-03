@@ -78,13 +78,6 @@ class ProductoService {
     return productoActualizado;
   }
 
-  async eliminarProducto(id) {
-    const producto = await productoRepository.eliminar(id);
-    if (!producto) {
-      throw new AppError('Producto no encontrado', 404, 'NOT_FOUND');
-    }
-  }
-
   async obtenerEstadisticas() {
     return await productoRepository.obtenerStats();
   }

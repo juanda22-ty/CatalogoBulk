@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router';
 import MainLayout from '../layouts/MainLayout.vue';
 import HomeView from '../views/HomeView.vue';
 import LoginView from '../views/LoginView.vue';
@@ -73,14 +73,22 @@ const routes = [
         name: 'usuarios',
         component: UsuariosView,
         meta: { requiresAuth: true, requiresAdmin: true }
+      },
+      {
+        path: ':pathMatch(.*)*',
+        name: 'no-encontrado',
+        redirect: { name: 'catalogo' }
       }
     ]
   }
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
-  routes
+  history: createWebHashHistory(),
+  routes,
+  scrollBehavior() {
+    return { top: 0, left: 0 };
+  }
 });
 
 router.beforeEach((to) => {

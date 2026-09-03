@@ -25,10 +25,6 @@ class UsuarioRepository {
   async actualizar(id, datos) {
     return await Usuario.findByIdAndUpdate(id, datos, { new: true, runValidators: true });
   }
-
-  async eliminar(id) {
-    return await Usuario.findByIdAndDelete(id);
-  }
 }
 
 export default new UsuarioRepository();

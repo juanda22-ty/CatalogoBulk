@@ -37,15 +37,6 @@ class ProductoController {
     }
   }
 
-  async eliminar(req, res, next) {
-    try {
-      await productoService.eliminarProducto(req.params.id);
-      res.status(204).send();
-    } catch (error) {
-      next(error);
-    }
-  }
-
   async obtenerStats(req, res, next) {
     try {
       const stats = await productoService.obtenerEstadisticas();

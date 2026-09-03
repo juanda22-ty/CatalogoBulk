@@ -17,6 +17,5 @@ router.get('/:id', (req, res, next) => productoController.obtenerPorId(req, res,
 // Endpoints de escritura (exclusivos para rol admin)
 router.post('/', auth, autorizarRoles('admin'), (req, res, next) => productoController.crear(req, res, next));
 router.put('/:id', auth, autorizarRoles('admin'), (req, res, next) => productoController.actualizar(req, res, next));
-router.delete('/:id', auth, autorizarRoles('admin'), (req, res, next) => productoController.eliminar(req, res, next));
 
 export default router;

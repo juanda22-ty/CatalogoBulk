@@ -39,8 +39,9 @@
               <q-btn v-if="auth.isAdmin" flat round dense color="primary" icon="edit" @click="abrirEditar(props.row)">
                 <q-tooltip>Editar</q-tooltip>
               </q-btn>
-              <q-btn v-if="auth.isAdmin" flat round dense color="negative" icon="delete" @click="eliminar(props.row)">
-                <q-tooltip>Eliminar</q-tooltip>
+              <q-btn v-if="auth.isAdmin" flat round dense :color="props.row.disponible ? 'warning' : 'positive'"
+                :icon="props.row.disponible ? 'visibility_off' : 'visibility'" @click="alternarEstado(props.row)">
+                <q-tooltip>{{ props.row.disponible ? 'Desactivar' : 'Activar' }}</q-tooltip>
               </q-btn>
             </q-td>
           </template>
@@ -83,8 +84,8 @@
               </div>
             </div>
 
-            <q-select v-model="formulario.proveedorId" :options="proveedores" option-value="_id" option-label="nombre"
-              emit-value label="Proveedor" outlined dense color="primary" lazy-rules
+            <q-select v-model="formulario.proveedorId" :options="opcionesProveedores"
+              map-options emit-value label="Proveedor" outlined dense color="primary" lazy-rules
               :rules="[required('El proveedor es requerido')]" :disable="guardando" />
 
             <q-select v-model="formulario.categoria" :options="categorias" option-value="nombre" option-label="nombre"
@@ -109,7 +110,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import api from '../services/api';
 import { useAppStore } from '../store';
 import { useFeedback } from '../composables/useFeedback';
@@ -118,7 +119,7 @@ import { required } from '../utils/validators';
 import { formatCurrency } from '../utils/format';
 
 const auth = useAppStore();
-const { confirmar, notificar } = useFeedback();
+const { notificar } = useFeedback();
 const { formatDate } = useDate();
 
 const tablaRef = ref(null);
@@ -212,6 +213,18 @@ function nombreProveedor(id) {
   return proveedores.value.find((p) => p._id === id)?.nombre || id;
 }
 
+const opcionesProveedores = computed(() => {
+  const activos = proveedores.value.filter((p) => p.activo);
+  if (
+    formulario.proveedorId &&
+    !activos.some((p) => p._id === formulario.proveedorId)
+  ) {
+    const seleccionado = proveedores.value.find((p) => p._id === formulario.proveedorId);
+    if (seleccionado) activos.unshift(seleccionado);
+  }
+  return activos.map((p) => ({ label: p.nombre, value: p._id }));
+});
+
 function recargar() {
   cargarProductos({ pagination: pagination.value });
 }
@@ -232,7 +245,7 @@ function abrirCrear() {
   dialogo.value = true;
 }
 
-function abrirEditar(producto) {
+async function abrirEditar(producto) {
   esEdicion.value = true;
   idEdicion.value = producto._id;
   Object.assign(formulario, {
@@ -245,6 +258,18 @@ function abrirEditar(producto) {
     imagenUrl: producto.imagenUrl || '',
     proveedorId: producto.proveedorId
   });
+
+  if (
+    producto.proveedorId &&
+    !proveedores.value.some((p) => p._id === producto.proveedorId)
+  ) {
+    try {
+      const prov = await api.proveedores.get(producto.proveedorId);
+      proveedores.value.push(prov);
+    } catch {
+    }
+  }
+
   dialogo.value = true;
 }
 
@@ -282,23 +307,19 @@ async function guardar() {
   }
 }
 
-async function eliminar(producto) {
-  const confirmado = await confirmar({
-    title: 'Eliminar producto',
-    message: `¿Seguro que quieres eliminar el producto "${producto.nombre}"?`,
-    okLabel: 'Eliminar',
-    okColor: 'negative'
-  });
-
-  if (!confirmado) return;
-
+async function alternarEstado(producto) {
   try {
-    await api.productos.remove(producto._id);
-    notificar('Producto eliminado correctamente', 'positive');
+    await api.productos.update(producto._id, { disponible: !producto.disponible });
+    notificar(
+      producto.disponible
+        ? 'Producto desactivado correctamente'
+        : 'Producto activado correctamente',
+      'positive'
+    );
     recargar();
   } catch (err) {
     notificar(
-      err.response?.data?.error || 'No se pudo eliminar el producto',
+      err.response?.data?.error || 'No se pudo cambiar el estado del producto',
       'negative'
     );
   }
