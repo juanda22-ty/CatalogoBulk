@@ -1,192 +1,160 @@
 <template>
   <q-page class="catalogo q-pa-lg">
-    <header class="catalogo__hero entrada">
-      <div class="catalogo__hero-inner">
-        <div class="kicker">Catálogo oficial</div>
-        <h1 class="catalogo__titulo texto-degradado">Nuestro catálogo</h1>
-        <p class="catalogo__subtitulo">
-          Explora productos, compara precios y encuentra lo que buscas en segundos.
-        </p>
-      </div>
-      <div class="catalogo__hero-deco">
-        <q-icon name="inventory_2" class="deco-icon deco-icon--1" />
-        <q-icon name="local_shipping" class="deco-icon deco-icon--2" />
-        <q-icon name="sell" class="deco-icon deco-icon--3" />
-      </div>
-    </header>
-
-    <div class="buscador entrada" style="animation-delay: 80ms">
+    <div class="buscador entrada">
+      <span class="buscador__lupa">
+        <q-icon name="search" />
+      </span>
       <q-input
         v-model="filtros.q"
         debounce="400"
-        outlined
+        borderless
         color="primary"
         clearable
-        placeholder="Buscar producto por nombre…"
+        placeholder="¿Qué producto estás buscando?"
         class="buscador__input"
+      />
+    </div>
+
+    <div class="categorias-scroll entrada" style="animation-delay: 80ms">
+      <button
+        type="button"
+        class="cat-chip"
+        :class="{ 'cat-chip--activa': filtros.categoria === null }"
+        @click="filtros.categoria = null"
+      >
+        Todas
+      </button>
+      <button
+        v-for="c in categorias"
+        :key="c._id"
+        type="button"
+        class="cat-chip"
+        :class="{ 'cat-chip--activa': filtros.categoria === c.nombre }"
+        @click="filtros.categoria = c.nombre"
+      >
+        {{ c.nombre }}
+      </button>
+    </div>
+
+    <div class="filtro-proveedor entrada" style="animation-delay: 120ms">
+      <q-select
+        v-model="filtros.proveedor"
+        :options="opcionesProveedores"
+        map-options
+        emit-value
+        clearable
+        outlined
+        dense
+        color="primary"
+        label="Todos los proveedores"
+        class="filtro-proveedor__select"
       >
         <template #prepend>
-          <span class="buscador__icon"><q-icon name="search" /></span>
+          <q-icon name="local_shipping" class="filtro-proveedor__icon" />
         </template>
-      </q-input>
+      </q-select>
     </div>
 
-    <div class="row q-col-gutter-md">
-      <aside class="col-12 col-md-3 catalogo__aside">
-        <q-card flat bordered class="catalogo__filtro entrada" style="animation-delay: 120ms">
-          <q-card-section class="q-pb-none">
-            <div class="text-subtitle1 text-primary text-bold">Categorías</div>
-          </q-card-section>
-          <q-list>
-            <q-item
-              clickable
-              class="cat-item"
-              :active="filtros.categoria === null"
-              active-class="cat-item--activa"
-              @click="filtros.categoria = null"
-            >
-              <q-item-section avatar><span class="cat-item__dot" /></q-item-section>
-              <q-item-section>Todas</q-item-section>
-              <q-item-section side>
-                <q-icon
-                  :class="filtros.categoria === null ? '' : 'invisible'"
-                  name="check_circle"
-                  color="primary"
-                />
-              </q-item-section>
-            </q-item>
-            <q-item
-              v-for="c in categorias"
-              :key="c._id"
-              clickable
-              class="cat-item"
-              :active="filtros.categoria === c.nombre"
-              active-class="cat-item--activa"
-              @click="filtros.categoria = c.nombre"
-            >
-              <q-item-section avatar><span class="cat-item__dot" /></q-item-section>
-              <q-item-section>{{ c.nombre }}</q-item-section>
-              <q-item-section side>
-                <q-icon
-                  :class="filtros.categoria === c.nombre ? '' : 'invisible'"
-                  name="check_circle"
-                  color="primary"
-                />
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </q-card>
+    <div v-if="loading && productos.length === 0" class="productos-grid q-mt-lg">
+      <div v-for="n in 8" :key="n" class="skeleton" style="height: 320px; border-radius: 18px"></div>
+    </div>
 
-        <q-card flat bordered class="catalogo__filtro q-mt-md entrada" style="animation-delay: 160ms">
+    <div v-else-if="productos.length === 0" class="catalogo__vacio entrada q-mt-lg">
+      <div class="catalogo__vacio-icon"><q-icon name="search_off" /></div>
+      <div class="text-subtitle1 text-weight-bold">No hay productos que coincidan con los filtros.</div>
+      <div class="text-caption text-grey-6 q-mt-xs">Prueba con otra búsqueda o quita los filtros.</div>
+    </div>
+
+    <div v-else>
+      <div class="productos-grid q-mt-lg">
+        <q-card
+          v-for="(producto, idx) in productos"
+          :key="producto._id"
+          class="producto-card"
+          flat
+          bordered
+          :style="{ '--i': idx }"
+        >
+          <div class="producto-card__media">
+            <q-img
+              v-if="producto.imagenUrl"
+              :src="producto.imagenUrl"
+              :ratio="1"
+              fit="cover"
+              class="producto-card__img"
+            />
+            <div v-else class="producto-card__placeholder">
+              <q-icon name="image" color="primary" size="48px" />
+            </div>
+            <span class="producto-card__etiqueta">{{ producto.categoria }}</span>
+          </div>
+
           <q-card-section>
-            <div class="text-subtitle1 text-primary text-bold q-mb-sm">Proveedor</div>
-            <q-select
-              v-model="filtros.proveedor"
-              :options="opcionesProveedores"
-              map-options
-              emit-value
-              clearable
-              outlined
-              dense
-              color="primary"
-              label="Todos los proveedores"
-            />
+            <div class="text-subtitle1 text-weight-bold producto-card__nombre">
+              {{ producto.nombre }}
+            </div>
+            <div class="text-h6 texto-degradado producto-card__precio q-mt-xs">
+              {{ formatCurrency(producto.precio) }}
+            </div>
+
+            <div class="row items-center justify-between q-mt-sm producto-card__footer">
+              <q-badge
+                :color="producto.disponible ? 'primary' : 'grey-4'"
+                :text-color="producto.disponible ? 'white' : 'grey-7'"
+                class="producto-card__badge"
+              >
+                <span class="punto" :class="producto.disponible ? 'punto--on' : 'punto--off'" />
+                {{ producto.disponible ? 'Disponible' : 'Sin stock' }}
+              </q-badge>
+              <span
+                class="text-caption text-grey-7 producto-card__proveedor"
+                :title="nombreProveedor(producto.proveedorId)"
+              >
+                {{ nombreProveedor(producto.proveedorId) }}
+              </span>
+            </div>
           </q-card-section>
         </q-card>
-      </aside>
+      </div>
 
-      <div class="col-12 col-md-9">
-        <div v-if="loading && productos.length === 0" class="productos-grid">
-          <div v-for="n in 8" :key="n" class="skeleton" style="height: 320px; border-radius: 18px"></div>
-        </div>
-
-        <div v-else-if="productos.length === 0" class="catalogo__vacio entrada">
-          <div class="catalogo__vacio-icon"><q-icon name="search_off" /></div>
-          <div class="text-subtitle1 text-weight-bold">No hay productos que coincidan con los filtros.</div>
-          <div class="text-caption text-grey-6 q-mt-xs">Prueba con otra búsqueda o quita los filtros.</div>
-        </div>
-
-        <div v-else>
-          <div class="productos-grid">
-            <q-card
-              v-for="(producto, idx) in productos"
-              :key="producto._id"
-              class="producto-card"
-              flat
-              bordered
-              :style="{ '--i': idx }"
-            >
-              <div class="producto-card__media">
-                <q-img
-                  v-if="producto.imagenUrl"
-                  :src="producto.imagenUrl"
-                  :ratio="1"
-                  fit="cover"
-                  class="producto-card__img"
-                />
-                <div v-else class="producto-card__placeholder">
-                  <q-icon name="image" color="primary" size="48px" />
-                </div>
-                <span class="producto-card__etiqueta">{{ producto.categoria }}</span>
-              </div>
-
-              <q-card-section>
-                <div class="text-subtitle1 text-weight-bold producto-card__nombre">
-                  {{ producto.nombre }}
-                </div>
-                <div class="text-h6 texto-degradado producto-card__precio q-mt-xs">
-                  {{ formatCurrency(producto.precio) }}
-                </div>
-
-                <div class="row items-center justify-between q-mt-sm producto-card__footer">
-                  <q-badge
-                    :color="producto.disponible ? 'primary' : 'grey-4'"
-                    :text-color="producto.disponible ? 'white' : 'grey-7'"
-                    class="producto-card__badge"
-                  >
-                    <span class="punto" :class="producto.disponible ? 'punto--on' : 'punto--off'" />
-                    {{ producto.disponible ? 'Disponible' : 'Sin stock' }}
-                  </q-badge>
-                  <span
-                    class="text-caption text-grey-7 producto-card__proveedor"
-                    :title="nombreProveedor(producto.proveedorId)"
-                  >
-                    {{ nombreProveedor(producto.proveedorId) }}
-                  </span>
-                </div>
-              </q-card-section>
-            </q-card>
-          </div>
-
-          <div class="q-mt-lg text-center entrada">
-            <q-btn
-              v-if="hayMas"
-              color="primary"
-              outline
-              rounded
-              icon="expand_more"
-              label="Cargar más"
-              no-caps
-              class="btn-glow"
-              :loading="loading"
-              @click="cargarMas"
-            />
-          </div>
-        </div>
+      <div v-if="hayMas" class="q-mt-lg text-center entrada">
+        <q-btn
+          color="primary"
+          outline
+          rounded
+          icon="expand_more"
+          label="Cargar más"
+          no-caps
+          class="btn-glow"
+          :loading="loading"
+          @click="cargarMas"
+        />
       </div>
     </div>
+
+    <Teleport to="body">
+      <q-btn
+        round
+        color="primary"
+        icon="arrow_upward"
+        aria-label="Volver arriba"
+        class="scroll-top-btn"
+        :class="{ 'scroll-top-btn--visible': mostrarSubir }"
+        @click="subirArriba"
+      />
+    </Teleport>
   </q-page>
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onMounted } from 'vue';
+import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue';
 import api from '../services/api';
 import { useFeedback } from '../composables/useFeedback';
 import { formatCurrency } from '../utils/format';
 
 const { notificar } = useFeedback();
 
-const LIMIT = 12;
+const LIMIT = 25;
 
 const productos = ref([]);
 const proveedores = ref([]);
@@ -201,7 +169,17 @@ const filtros = reactive({
   proveedor: null
 });
 
-const hayMas = () => productos.value.length < total.value;
+const hayMas = computed(() => productos.value.length < total.value);
+
+const mostrarSubir = ref(false);
+
+function actualizarBotonSubir() {
+  mostrarSubir.value = window.scrollY > 80;
+}
+
+function subirArriba() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 const proveedoresActivos = computed(() =>
   proveedores.value.filter((p) => p.activo)
@@ -284,6 +262,12 @@ watch(
 onMounted(() => {
   cargarOpciones();
   cargarProductos(true);
+  window.addEventListener('scroll', actualizarBotonSubir, { passive: true });
+  actualizarBotonSubir();
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', actualizarBotonSubir);
 });
 </script>
 
@@ -293,62 +277,93 @@ onMounted(() => {
   margin: 0 auto; 
 }
 
-.catalogo__hero {
-  position: relative;
+.buscador {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  overflow: hidden;
-  margin-bottom: 22px;
-  padding: 34px 38px;
-  border-radius: 24px;
+  gap: 14px;
+  padding: 8px 20px 8px 10px;
+  border-radius: 999px;
   border: 1px solid var(--line);
-  background: linear-gradient(115deg, var(--wash-strong) 0%, #ffffff 60%, var(--wash) 100%);
-  background-size: 200% 200%;
-  animation: gradient-pan 16s ease infinite;
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgba(18, 60, 42, 0.06);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s var(--ease-spring);
 }
-
-.catalogo__hero-inner { position: relative; z-index: 1; }
-.catalogo__titulo { margin: 8px 0 0; font-size: clamp(1.8rem, 3.4vw, 2.6rem); letter-spacing: 0; }
-.catalogo__subtitulo { max-width: 420px; margin: 10px 0 0; color: var(--muted); font-size: 1rem; line-height: 1.5; }
-
-.deco-icon {
-  position: absolute;
-  color: rgba(21, 148, 71, 0.16);
-  pointer-events: none;
+.buscador:focus-within {
+  border-color: var(--green-soft);
+  box-shadow: 0 14px 40px rgba(21, 148, 71, 0.16);
+  transform: translateY(-2px);
 }
-
-.deco-icon--1 { top: -18px; right: 120px; font-size: 7rem; animation: float 7s ease-in-out infinite; }
-.deco-icon--2 { bottom: -26px; right: 30px; font-size: 5.4rem; animation: float 9s ease-in-out infinite reverse; }
-.deco-icon--3 { top: 20px; right: 330px; font-size: 2.6rem; animation: float 5.5s ease-in-out infinite 1.2s; }
-
-.buscador { border-radius: 16px; transition: transform 0.3s var(--ease-spring); padding-bottom: 20px; }
-.buscador:focus-within { transform: translateY(-2px); }
-.buscador__icon { display: flex; align-items: center; color: var(--muted); transition: color 0.3s ease; }
-.buscador:focus-within .buscador__icon { color: var(--green-dark); animation: icon-bounce 0.5s var(--ease-spring); }
-
-/* Aside con z-index controlado para evitar superposiciones */
-.catalogo__aside { 
-  position: sticky; 
-  top: 92px; 
-  z-index: 2;
+.buscador__lupa {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+  color: #ffffff;
+  font-size: 1.35rem;
+  box-shadow: 0 8px 20px rgba(21, 148, 71, 0.35);
+  transition: transform 0.3s var(--ease-spring);
 }
+.buscador:focus-within .buscador__lupa { transform: scale(1.08) rotate(-6deg); }
+.buscador__input { flex: 1 1 auto; }
 
-.catalogo__filtro { border-radius: 20px; }
+.categorias-scroll {
+  display: flex;
+  gap: 10px;
+  margin: 18px 0 16px;
+  padding: 4px 2px 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.categorias-scroll::-webkit-scrollbar { display: none; }
 
-.cat-item {
-  border-radius: 10px;
-  margin: 2px 8px;
+.cat-chip {
+  flex: 0 0 auto;
+  padding: 9px 20px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #ffffff;
   color: var(--muted);
-  transition: transform 0.25s var(--ease-spring), background 0.25s ease, color 0.25s ease;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.25s var(--ease-spring), background 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.cat-chip:hover {
+  color: var(--green-dark);
+  border-color: var(--green-soft);
+  transform: translateY(-2px);
+}
+.cat-chip--activa {
+  background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 8px 20px rgba(21, 148, 71, 0.28);
 }
 
-.cat-item:hover { transform: translateX(5px); background: var(--wash-strong); color: var(--green-dark); }
-.cat-item__dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--line); transition: background 0.25s ease, transform 0.25s var(--ease-spring); }
-.cat-item--activa { color: var(--green-dark); font-weight: 700; }
-.cat-item--activa .cat-item__dot { background: var(--green); transform: scale(1.35); }
-.cat-item .q-item__section--main { overflow: hidden; }
-.cat-item .q-item__label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.filtro-proveedor { margin-bottom: 4px; }
+.filtro-proveedor__select { max-width: 300px; }
+.filtro-proveedor__icon { color: var(--green); transition: transform 0.3s var(--ease-spring); }
+.filtro-proveedor__select :deep(.q-field__control) {
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(18, 60, 42, 0.06);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.filtro-proveedor__select:hover :deep(.q-field__control) {
+  border-color: var(--green-soft);
+}
+.filtro-proveedor__select.q-field--focused :deep(.q-field__control) {
+  border-color: var(--green-soft);
+  box-shadow: 0 10px 26px rgba(21, 148, 71, 0.16);
+}
+.filtro-proveedor__select.q-field--focused .filtro-proveedor__icon {
+  transform: scale(1.15) rotate(-8deg);
+}
 
 .productos-grid {
   display: grid;
@@ -446,22 +461,36 @@ onMounted(() => {
 .punto--on { background: #ffffff; animation: blink 1.6s ease infinite; }
 .punto--off { background: #b0bec5; }
 
+.scroll-top-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 5000;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+  box-shadow: 0 10px 24px rgba(18, 60, 42, 0.28);
+  transition: opacity 0.3s ease, transform 0.3s var(--ease-spring), box-shadow 0.25s ease;
+}
+.scroll-top-btn--visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.scroll-top-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(18, 60, 42, 0.34);
+}
+
 .catalogo__vacio { padding: 64px 20px; text-align: center; border: 1px dashed var(--line); border-radius: 20px; background: #ffffff; }
 .catalogo__vacio-icon { display: grid; place-items: center; width: 84px; height: 84px; margin: 0 auto 16px; border-radius: 26px; background: var(--wash-strong); color: var(--green); font-size: 2.4rem; animation: float 4.5s ease-in-out infinite; }
 
 /* Media queries ajustados */
-@media (max-width: 1023px) {
-  .catalogo__aside {
-    position: static;
-    margin-bottom: 24px;
-  }
-}
-
 @media (max-width: 767px) {
-  .catalogo__hero { padding: 26px 24px; }
-  .deco-icon--1 { right: -20px; }
-  .deco-icon--2, .deco-icon--3 { display: none; }
-  
+  .buscador { padding: 6px 14px 6px 6px; gap: 10px; }
+  .buscador__lupa { width: 40px; height: 40px; font-size: 1.15rem; }
+  .filtro-proveedor__select { max-width: 100%; }
+
   .productos-grid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 12px;
