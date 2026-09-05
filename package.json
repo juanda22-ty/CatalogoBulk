@@ -1,6 +1,7 @@
 {
   "name": "catalogobulk",
   "version": "1.0.0",
+  "description": "CatalogoBulk - frontend estático y API serverless para Vercel",
   "private": true,
   "type": "module",
   "scripts": {
