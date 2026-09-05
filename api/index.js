@@ -28,10 +28,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'No se pudo conectar a la base de datos' });
   }
 
-  // Por si Vercel entrega la ruta sin el prefijo /api
-  if (!req.url.startsWith('/api')) {
-    req.url = `/api${req.url}`;
-  }
-
   return app(req, res);
 }
